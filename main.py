@@ -1,16 +1,21 @@
 import discord
+from discord import client
 from discord.ext import commands
-from Weather import Weather
+from Weather import Weather as WeatherStats
+from Overwatch import Api
+from Overwatch import UserStats
 from decouple import config
 from os import walk
-import os
-import asyncio
 from Models import *
 from YTDLSource import YTDLSource
 
+#api keys
 DISOCRD_API_KEY = config('DISCORDBOTID', default=False)
 WEATHER_API_KEY = config('XRAPIDAPIKEY', default=False)
 
+#overwatch stats preference
+checkInterval = 60
+monitoringUsers = UserStats.monitoringUsers()
 
 def getFiles():
     """
@@ -27,52 +32,41 @@ def create_tables():
     Функция создает базу данных
     """
     with database:
-        database.create_tables([])
+        database.create_tables([User])
 
-class Music(commands.Cog):
+class Overwatch(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
-    async def play(self, ctx, *, url):
-        """Запускает адскую машину для гачи база"""
-        async with ctx.typing():
-            player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
-            ctx.voice_client.play(player)
-        await ctx.send('Сейчас играет: {}'.format(player.title))
-
-
-    @commands.command()
-    async def stop(self, ctx):
-        """Я устал, я ухожу"""
-        await ctx.voice_client.disconnect()
-
-    
-    @commands.command()
-    async def skip(self, ctx):
-        """Скипаем гачи..."""
-        ctx.voice_client.stop()
-        await ctx.send("Песня скипнута")
-
-    @play.before_invoke
-    async def ensure_voice(self, ctx):
-        if ctx.voice_client is None:
-            if ctx.author.voice:
-                await ctx.author.voice.channel.connect()
+    async def startStats(self, ctx, battleNet):
+        """
+        Отслежование статистики
+        """
+        if UserStats.getUserById((ctx.author.id, 'discord')) == None:
+            ovApi = Api('pc', 'global', battleNet.replace("#", "-"))
+            if (str(ovApi.getUser()) == "{'message': 'Error: Profile not found'}"):
+                await ctx.send("Игрок не найден")
             else:
-                await ctx.send("Зайди в канал БАКА")
-                raise commands.CommandError("Author not connected to a voice channel.")
-        elif ctx.voice_client.is_playing():
-            # нужно нормально сделать очередь !!!!!!!!
-            await ctx.send("Добавленно в очередь")
-            while (True):
-                await asyncio.sleep(1)
-                if ctx.voice_client.is_playing() == True:
-                    continue
-                else:
-                    break
-            #ctx.voice_client.stop()
+                usr = UserStats(ctx.author.id, battleNet.replace("#", "-"), ovApi.getRanks(ovApi.getUser()))
+                usr.addUser()
+                await ctx.send('Аккаунт добавлен')
+        else:
+            await ctx.send('Аккаунт уже добавлен')
 
+
+class Weather(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command()
+    async def weather(self, ctx):
+        """Выводит погоду"""
+        w = WeatherStats(WEATHER_API_KEY)
+        weatherdata = w.parsData(w.getWeahter())
+        icon = w.getWeatherIcon(weatherdata.get("icon"))
+        w.card(weatherdata, icon)
+        await ctx.send(file=discord.File('assets/tmp/currentWeather.png'))
 
 description = '''Lina-Inverse'''
 bot = commands.Bot(command_prefix='`', description=description)
@@ -85,15 +79,7 @@ async def on_ready():
         create_tables()
     #bot playing in:
     await bot.change_presence(activity=discord.Game(name="`help"))
-
-@bot.command()
-async def weather(ctx):
-    """Выводит погоду"""
-    w = Weather(WEATHER_API_KEY)
-    weatherdata = w.parsData(w.getWeahter())
-    icon = w.getWeatherIcon(weatherdata.get("icon"))
-    w.card(weatherdata, icon)
-    await ctx.send(file=discord.File('assets/tmp/currentWeather.png'))
-
-bot.add_cog(Music(bot))
+    
+bot.add_cog(Weather(bot))
+bot.add_cog(Overwatch(bot))
 bot.run(DISOCRD_API_KEY)

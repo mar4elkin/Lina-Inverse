@@ -1,6 +1,5 @@
 from peewee import *
 
-
 DATABASE = 'database.db'
 
 database = SqliteDatabase(DATABASE)
@@ -15,9 +14,13 @@ class BaseModel(Model):
         """
         database = database
 
-# class Queue(BaseModel):
-#     """
-#     Класс очереди для песен
-#     """
-#     Id = IntegerField(primary_key=True)
-#     songName = CharField()
+class User(BaseModel):
+    """
+    Класс юзеров
+    """
+    Id = IntegerField(primary_key=True)
+    discordUserId = IntegerField()
+    battleNetId = CharField()
+    lastRank = CharField()
+    monitor = BooleanField()
+

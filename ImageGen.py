@@ -12,7 +12,7 @@ class ImageGen(object):
         self.wIcon = 'assets/tmp/weather.png'
         self.weatherData = weatherData
 
-    def cardHolder(self):
+    def cardWeatherHolder(self):
         """
         Метод для генерации карточки используется переменные из конструктора в которых храниться путь к картинкам
         """
