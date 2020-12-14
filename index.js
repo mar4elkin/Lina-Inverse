@@ -3,20 +3,25 @@ const client = new Discord.Client()
 const Database = require('./Database')
 const database = new Database()
 const OverwatchApi = require('./OverwatchApi')
+const fs = require('fs');
 
 const prefix = "`"
 const commands = {
 	"help": {
-		"description": "Shows that message",
+		"description": "Справка по командам",
 		"name": prefix + "help"
 	},
 	"ping": {
-		"description": "Test command",
+		"description": "Тестовая команда",
 		"name": prefix + "ping"
 	},
-	"ov_start": {
-		"description": "Start overwatch stats. `ov_start user#1234",
-		"name": prefix + "ov_start"
+	"ov.add": {
+		"description": "Добавление отслеживаемых профилей",
+		"name": prefix + "ov.add"
+	},
+	"bot.settings": {
+		"description": "Настройка бота",
+		"name": prefix + "bot.settings"
 	}
 }
 
@@ -28,19 +33,32 @@ client.on('ready', () => {
 		'discord_id, TEXT',
 		'battle_id, TEXT',
 		'last_rank, TEXT'
-	) 
-	setInterval(checkUser, 5000);
+	)
+
+	//client.channels.cache.get('763138941938434048').send('Hello here!')
+	//channel.send("Перезагружен и готов убивать")
 })
 
 client.on('message', message => {
-	if (message.content.startsWith(getCommand('help'))) {
+	//setInterval(checkUser, 5000)
+
+	if (message.content == (getCommand('bot.settings'))) {
+		message.channel.send(
+			'```Доступные настройки:\n' +
+			'1) Канал для бота (`bot.settings.channel "название канала")\n' +
+			'Для выбора используйте цифру нужного варианта.\n'+
+			'Чтобы выйти `bot.settings.exit ```'
+		)
+		botSettings(message)
+	}
+	if (message.content == (getCommand('help'))) {
 		message.channel.send(helpMessage())
 	}
-	if (message.content.startsWith(getCommand('ping'))) {
+	if (message.content == (getCommand('ping'))) {
 		//sendDm(message.author.id, 'ping')
 		message.channel.send('bong!')
 	}
-	if (message.content.startsWith(getCommand('ov_start'))) {
+	if (message.content.startsWith(getCommand('ov.add'))) {
 		//message.channel.send("```" + message.content.split(' ') + "```")
 		if (message.content.split(' ')[1] == undefined) {
 			sendDm(message.author.id, "Battle id не может быть пустым")
@@ -81,16 +99,14 @@ function checkUserCallback(rows) {
 }
 
 function overwatchApiStatsCallback(ranks, el) {
-	// console.log(ranks['competitive']['tank'])
-	// console.log(ranks['competitive']['damage'])
-	// console.log(ranks['competitive']['support'])
+	dbRanks = JSON.parse(el['last_rank'])
+	apiRanks = ranks['competitive']
 
-	//console.log(el[])
-
-	// if (ranks['competitive']['tank'] != el['last_rank']['tank'] || ranks['competitive']['damage'] != el['last_rank']['damage'] || ranks['competitive']['support'] != el['last_rank']['support']) {
-	// 	database.insertValue('UserOverwatch', ['discord_id', 'battle_id, last_rank'], [el['discord_id'], el['battle_id'], ranks['competitive']])
-	// 	client.users.cache.get(el['discord_id']).send('asdasdasd')//.send(ranks['competitive'])
-	// }
+	if (dbRanks['tank']['rank'] == apiRanks['tank']['rank'] || dbRanks['damage']['rank'] != apiRanks['damage']['rank'] || dbRanks['support']['rank'] != apiRanks['support']['rank']) {
+		apiRanksString = JSON.stringify(apiRanks)
+		database.updateViaBattleTag('UserOverwatch', JSON.stringify(apiRanks), el['battle_id'])
+		sendDm(el['discord_id'], 'ok')//JSON.stringify(ranks))
+	}
 }
 
 function ovStart(discord_id, battle_id) {
@@ -118,5 +134,46 @@ function ovStartDbInsert(ranks, discord_id, battle_id) {
 	database.insertValue('UserOverwatch', ['discord_id', 'battle_id, last_rank'], [discord_id, battle_id, JSON.stringify(ranks['competitive'])])
 	sendDm(discord_id, "Аккаунт добавлен")
 }
+
+function botSettings(message) {
+	const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 30000 })
+	collector.on('collect', message => {
+		if (message.content.startsWith("1")) {
+			if (message.content.split(' ')[1] != undefined) {
+				var channelsArr = []
+				message.guild.channels.cache.find(ch => {
+					channelsArr.push(ch.name) 
+					//console.log(ch.name)
+				})
+
+				if(channelsArr.indexOf(message.content.split(' ')[1]) != -1) {
+					message.channel.send('Я теперь буду писать в канал #' + message.content.split(' ')[1])
+					message.guild.channels.cache.find(ch => {
+						if (ch.name === message.content.split(' ')[1]  ) {
+							//message.guild.id
+							//ch.id
+							//todo: add channel to db
+						}	
+					})
+				
+				channelsArr = []
+
+				} else {
+					message.channel.send('Такого канала нету')
+				}
+
+			} else {
+				message.channel.send('Ты ракушка!')
+				message.channel.send('`bot.settings')
+			}
+		} else if (message.content == "`bot.settings.exit") {
+			message.channel.send("Ага ну и пиздуй")
+		}
+	})
+}
+
+fs.readFile('./api.key.txt', 'utf8', function(err, contents) {
+    client.login(contents)
+})
 
 

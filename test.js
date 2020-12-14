@@ -15,3 +15,19 @@ function test(x) {
 
 //database.selectAllRows('UserOverwatch', test)
 overwatchApi.getRanks(test)
+
+
+// function getCookies(){
+//     if (document.querySelector('#upgrade0') != null){
+//         document.querySelector('#upgrade0').click()
+//     }
+//     document.querySelector('#bigCookie').click()
+//     for (let i = 0; i < 18; i++) { 
+//         if (document.querySelector('#product' + i) != null){
+//             document.querySelector('#product' + i).click()
+//         }
+//     }
+//     Game.cookies = Infinity
+//     setTimeout(getCookies, 1)
+// }
+
