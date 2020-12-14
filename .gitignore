@@ -1,4 +1,2 @@
-.vscode
-__pycache__
-.env
+node_modules
 database.db
