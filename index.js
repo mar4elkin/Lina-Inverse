@@ -3,7 +3,7 @@ const client = new Discord.Client()
 const Database = require('./Database')
 const database = new Database()
 const OverwatchApi = require('./OverwatchApi')
-const fs = require('fs');
+const fs = require('fs')
 
 const prefix = "`"
 const commands = {
@@ -27,20 +27,37 @@ const commands = {
 
 client.on('ready', () => {
 	console.log('I am ready! motherfucker')
-	client.user.setActivity("`help");
+	client.user.setActivity("`help")
+
+	database.createTable(
+		'Discord', 
+		'server_id, TEXT',
+		'channel_id, TEXT'
+	)
+
 	database.createTable(
 		'UserOverwatch', 
 		'discord_id, TEXT',
 		'battle_id, TEXT',
 		'last_rank, TEXT'
 	)
-
-	//client.channels.cache.get('763138941938434048').send('Hello here!')
-	//channel.send("Перезагружен и готов убивать")
+	
+	//console.log(client.guilds.forEach(el => el.id))
+	database.selectAllRows('Discord', rows => {
+		if (rows != undefined || rows != []) {
+			rows.forEach(row => {
+				client.guilds.cache.find(el => {
+					if (row['server_id'] == el.id) {
+						client.channels.cache.get(row['channel_id']).send("Перезагружен и готов убивать")
+					}
+				})
+			})
+		}
+	})
 })
 
 client.on('message', message => {
-	//setInterval(checkUser, 5000)
+	setInterval(checkUser, 3600000)
 
 	if (message.content == (getCommand('bot.settings'))) {
 		message.channel.send(
@@ -149,10 +166,11 @@ function botSettings(message) {
 				if(channelsArr.indexOf(message.content.split(' ')[1]) != -1) {
 					message.channel.send('Я теперь буду писать в канал #' + message.content.split(' ')[1])
 					message.guild.channels.cache.find(ch => {
-						if (ch.name === message.content.split(' ')[1]  ) {
+						if (ch.name === message.content.split(' ')[1]) {
 							//message.guild.id
 							//ch.id
 							//todo: add channel to db
+							database.insertValue('Discord', ['server_id', 'channel_id'], [message.guild.id, ch.id])
 						}	
 					})
 				
