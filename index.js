@@ -62,7 +62,8 @@ client.on('ready', () => {
 
 client.on('message', message => {
 	//setInterval(checkUser, 3600000)
-	checkUser()
+	setInterval(checkUser, 1800000)
+	//checkUser()
 
 	if (message.content == (getCommand('bot.settings'))) {
 		message.channel.send(
@@ -175,6 +176,8 @@ async function overwatchApiStatsCallback(ranks, el) {
 					client.guilds.cache.find(guild_el => {
 						if (row['server_id'] == guild_el.id) {
 							client.channels.cache.get(row['channel_id']).send("<@" + el['discord_id'] + ">", {files: ["./tmp/overwatch/overwatchImage.png"]})
+							//let keks = '{"tank":{"rank":2539,"rank_img":"https://d1u1mce87gyfbn.cloudfront.net/game/rank-icons/rank-PlatinumTier.png"},"damage":{"rank":2001,"rank_img":"https://d1u1mce87gyfbn.cloudfront.net/game/rank-icons/rank-GoldTier.png"},"support":{"rank":2005,"rank_img":"https://d1u1mce87gyfbn.cloudfront.net/game/rank-icons/rank-PlatinumTier.png"}}'
+							//database.updateViaBattleTag('UserOverwatch', keks, '35', 'mar4elkin#2842')
 						}
 					})
 				})
