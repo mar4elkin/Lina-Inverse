@@ -61,8 +61,8 @@ client.on('ready', () => {
 })
 
 client.on('message', message => {
-	setInterval(checkUser, 3600000)
-	//checkUser()
+	//setInterval(checkUser, 3600000)
+	checkUser()
 
 	if (message.content == (getCommand('bot.settings'))) {
 		message.channel.send(
@@ -120,7 +120,7 @@ function checkUserCallback(rows) {
 	})
 }
 
-function overwatchApiStatsCallback(ranks, el) {
+async function overwatchApiStatsCallback(ranks, el) {
 	dbGames = JSON.parse(el['games'])
 	dbRanks = JSON.parse(el['last_rank'])
 	apiRanks = ranks['competitive']
@@ -154,18 +154,18 @@ function overwatchApiStatsCallback(ranks, el) {
 			overwatchImage.tank = dbRanks['tank']['rank'] + " → " + dbRanks['tank']['rank']
 		}
 		if (dbRanks['damage']['rank'] != apiRanks['damage']['rank']) {
-			overwatchImage.damage = dbRanks['damage']['rank'] + " → " + apiRanks['damage']['rank'] + moreOrLessPts(dbRanks['tank']['rank'], apiRanks['tank']['rank'])
+			overwatchImage.damage = dbRanks['damage']['rank'] + " → " + apiRanks['damage']['rank'] + moreOrLessPts(dbRanks['damage']['rank'], apiRanks['tank']['rank'])
 		} else {
 			overwatchImage.damage = dbRanks['damage']['rank'] + " → " + dbRanks['damage']['rank']
 		}
 		if (dbRanks['support']['rank'] != apiRanks['support']['rank']) {
-			overwatchImage.support = dbRanks['support']['rank'] + " → " + apiRanks['support']['rank'] + moreOrLessPts(dbRanks['tank']['rank'], apiRanks['tank']['rank'])
+			overwatchImage.support = dbRanks['support']['rank'] + " → " + apiRanks['support']['rank'] + moreOrLessPts(dbRanks['support']['rank'], apiRanks['tank']['rank'])
 		} else {
 			overwatchImage.support = dbRanks['support']['rank'] + " → " + dbRanks['support']['rank']
 		}
 
 		let imageCreater = new ImageCreater('overwatch', overwatchImage)
-		imageCreater.createImage()
+		await imageCreater.createImage()
 		
 		apiRanksString = JSON.stringify(apiRanks)
 		database.updateViaBattleTag('UserOverwatch', JSON.stringify(apiRanks), ranks['games']['competitive']['played'], el['battle_id'])
