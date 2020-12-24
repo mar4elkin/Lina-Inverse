@@ -154,12 +154,12 @@ async function overwatchApiStatsCallback(ranks, el) {
 			overwatchImage.tank = dbRanks['tank']['rank'] + " → " + dbRanks['tank']['rank']
 		}
 		if (dbRanks['damage']['rank'] != apiRanks['damage']['rank']) {
-			overwatchImage.damage = dbRanks['damage']['rank'] + " → " + apiRanks['damage']['rank'] + moreOrLessPts(dbRanks['damage']['rank'], apiRanks['tank']['rank'])
+			overwatchImage.damage = dbRanks['damage']['rank'] + " → " + apiRanks['damage']['rank'] + moreOrLessPts(dbRanks['damage']['rank'], apiRanks['damage']['rank'])
 		} else {
 			overwatchImage.damage = dbRanks['damage']['rank'] + " → " + dbRanks['damage']['rank']
 		}
 		if (dbRanks['support']['rank'] != apiRanks['support']['rank']) {
-			overwatchImage.support = dbRanks['support']['rank'] + " → " + apiRanks['support']['rank'] + moreOrLessPts(dbRanks['support']['rank'], apiRanks['tank']['rank'])
+			overwatchImage.support = dbRanks['support']['rank'] + " → " + apiRanks['support']['rank'] + moreOrLessPts(dbRanks['support']['rank'], apiRanks['support']['rank'])
 		} else {
 			overwatchImage.support = dbRanks['support']['rank'] + " → " + dbRanks['support']['rank']
 		}
