@@ -3,6 +3,7 @@ const client = new Discord.Client()
 const Database = require('./Database')
 const database = new Database()
 const OverwatchApi = require('./OverwatchApi')
+const ImageCreater = require('./ImageCreater')
 const fs = require('fs')
 
 const prefix = "`"
@@ -39,25 +40,29 @@ client.on('ready', () => {
 		'UserOverwatch', 
 		'discord_id, TEXT',
 		'battle_id, TEXT',
-		'last_rank, TEXT'
+		'last_rank, TEXT',
+		'games, TEXT'
 	)
 	
 	//console.log(client.guilds.forEach(el => el.id))
 	database.selectAllRows('Discord', rows => {
-		if (rows != undefined || rows != []) {
-			rows.forEach(row => {
-				client.guilds.cache.find(el => {
-					if (row['server_id'] == el.id) {
-						client.channels.cache.get(row['channel_id']).send("Перезагружен и готов убивать")
-					}
+		if (rows != undefined) {
+			if (rows != []) {
+				rows.forEach(row => {
+					client.guilds.cache.find(guild_el => {
+						if (row['server_id'] == guild_el.id) {
+							client.channels.cache.get(row['channel_id']).send("Перезагружен и готов убивать!")
+						}
+					})
 				})
-			})
+			}
 		}
 	})
 })
 
 client.on('message', message => {
 	setInterval(checkUser, 3600000)
+	//checkUser()
 
 	if (message.content == (getCommand('bot.settings'))) {
 		message.channel.send(
@@ -116,13 +121,65 @@ function checkUserCallback(rows) {
 }
 
 function overwatchApiStatsCallback(ranks, el) {
+	dbGames = JSON.parse(el['games'])
 	dbRanks = JSON.parse(el['last_rank'])
 	apiRanks = ranks['competitive']
+	
+	if (dbGames != ranks['games']['competitive']['played']) {
+		
+		overwatchImage = {
+			"username" : ranks['mar4elkin'],
+			"avatar": ranks['portrait'],
+			"tank_img": ranks['competitive']['tank']['rank_img'],
+			"damage_img": ranks['competitive']['damage']['rank_img'],
+			"support_img": ranks['competitive']['support']['rank_img']
+		}
 
-	if (dbRanks['tank']['rank'] == apiRanks['tank']['rank'] || dbRanks['damage']['rank'] != apiRanks['damage']['rank'] || dbRanks['support']['rank'] != apiRanks['support']['rank']) {
+		function moreOrLessPts(oldvalue, newvalue) {
+			let value = ''
+			if (oldvalue > newvalue) {	
+				finalValue = oldvalue - newvalue
+				value = ' - ' + finalValue
+			}
+			if (oldvalue < newvalue) {
+				finalValue = newvalue - oldvalue
+				value = ' + ' + finalValue
+			}
+			return value
+		}
+
+		if (dbRanks['tank']['rank'] != apiRanks['tank']['rank']) {
+			overwatchImage.tank = dbRanks['tank']['rank'] + " → " + apiRanks['tank']['rank'] + moreOrLessPts(dbRanks['tank']['rank'], apiRanks['tank']['rank'])
+		} else {
+			overwatchImage.tank = dbRanks['tank']['rank'] + " → " + dbRanks['tank']['rank']
+		}
+		if (dbRanks['damage']['rank'] != apiRanks['damage']['rank']) {
+			overwatchImage.damage = dbRanks['damage']['rank'] + " → " + apiRanks['damage']['rank'] + moreOrLessPts(dbRanks['tank']['rank'], apiRanks['tank']['rank'])
+		} else {
+			overwatchImage.damage = dbRanks['damage']['rank'] + " → " + dbRanks['damage']['rank']
+		}
+		if (dbRanks['support']['rank'] != apiRanks['support']['rank']) {
+			overwatchImage.support = dbRanks['support']['rank'] + " → " + apiRanks['support']['rank'] + moreOrLessPts(dbRanks['tank']['rank'], apiRanks['tank']['rank'])
+		} else {
+			overwatchImage.support = dbRanks['support']['rank'] + " → " + dbRanks['support']['rank']
+		}
+
+		let imageCreater = new ImageCreater('overwatch', overwatchImage)
+		imageCreater.createImage()
+		
 		apiRanksString = JSON.stringify(apiRanks)
-		database.updateViaBattleTag('UserOverwatch', JSON.stringify(apiRanks), el['battle_id'])
-		sendDm(el['discord_id'], 'ok')//JSON.stringify(ranks))
+		database.updateViaBattleTag('UserOverwatch', JSON.stringify(apiRanks), ranks['games']['competitive']['played'], el['battle_id'])
+		database.selectAllRows('Discord', rows => {
+			if (rows != undefined || rows != []) {
+				rows.forEach(row => {
+					client.guilds.cache.find(guild_el => {
+						if (row['server_id'] == guild_el.id) {
+							client.channels.cache.get(row['channel_id']).send("<@" + el['discord_id'] + ">", {files: ["./tmp/overwatch/overwatchImage.png"]})
+						}
+					})
+				})
+			}
+		})
 	}
 }
 
@@ -148,7 +205,7 @@ function ovStartCallback(value, discord_id, battle_id) {
 }
 
 function ovStartDbInsert(ranks, discord_id, battle_id) {
-	database.insertValue('UserOverwatch', ['discord_id', 'battle_id, last_rank'], [discord_id, battle_id, JSON.stringify(ranks['competitive'])])
+	database.insertValue('UserOverwatch', ['discord_id', 'battle_id, last_rank', 'games'], [discord_id, battle_id, JSON.stringify(ranks['competitive']), ranks['games']['competitive']['played']])
 	sendDm(discord_id, "Аккаунт добавлен")
 }
 

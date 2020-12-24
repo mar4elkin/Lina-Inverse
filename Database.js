@@ -47,6 +47,7 @@ class Database {
         })
         this.db.run(sql, values)
     }
+
     updateValue(tableName, setValues, whereValue) {
         //database.updateValue('your_mom_is', ['asd, nooooooooo'], 'id, 1')
         //database.updateValue('your_mom_is', ['asd, nooooooooo', 'dsa, hahahahaha'], 'id, 1')
@@ -65,11 +66,13 @@ class Database {
         sql = sql + 'WHERE ' + whereValue.split(',')[0].trim() + ' = ' + whereValue.split(',')[1].trim()
         this.db.run(sql, setValuesData)
     }
-    updateViaBattleTag(tableName, dict, battle) {
-        let sql = `UPDATE ${tableName} SET last_rank = ? WHERE battle_id = ?`
-        let data = [dict, battle]
+
+    updateViaBattleTag(tableName, dict, games, battle) {
+        let sql = `UPDATE ${tableName} SET last_rank = ?, games = ? WHERE battle_id = ?`
+        let data = [dict, games, battle]
         this.db.run(sql, data)
     }
+
     select(tableName, id, callback) {
         //database.select('your_mom_is', 1, callback)
 
@@ -78,18 +81,21 @@ class Database {
             callback(row)
         })
     }
+
     selectViaDiscord(tableName, discord_id, callback) {
         var sql = 'SELECT * FROM ' + tableName + ' WHERE discord_id = ?'
         this.db.get(sql, [discord_id], (err, row) => {
             callback(row)
         })
     }
+
     selectViaBattlenet(tableName, battle_id, callback) {
         var sql = 'SELECT * FROM ' + tableName + ' WHERE battle_id = ?'
         this.db.get(sql, [battle_id], (err, row) => {
             callback(row)
         })
     }
+    
     selectAllRows(tableName, callback) {
         var sql = 'SELECT * FROM ' + tableName
         this.db.all(sql, [], (err, rows ) => {

@@ -4,6 +4,7 @@ class OverwatchApi {
     constructor(tag) {
         this.tag = tag.replace('#', '-')
     }
+    
     getRanks(callback) {
         overwatch.getProfile('pc', 'global', this.tag, (err, json) => {
             if (err) {
