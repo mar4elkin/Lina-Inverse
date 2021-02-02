@@ -1,0 +1,8 @@
+discord.py
+peewee
+Pillow
+overwatch-api
+python-decouple
+flask
+beautifulsoup4 
+requests
