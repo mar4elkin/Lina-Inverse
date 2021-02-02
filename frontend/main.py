@@ -1,5 +1,6 @@
 import asyncio
 import discord
+import os
 from asyncio.tasks import sleep
 from discord import client
 from discord import channel
@@ -15,6 +16,17 @@ from Stats import Stats
 
 #api keys
 DISOCRD_API_KEY = config('DISCORDBOTID', default=False)
+
+def tmpFolder():
+    """
+    Функция создает "tmp" папку 
+    """
+    try:
+        os.mkdir('tmp/overwatch')
+    except OSError:
+        print ("tmp папка не создана")
+    else:
+        print ("tmp папка создан")
 
 def getFiles():
     """
