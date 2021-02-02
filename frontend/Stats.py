@@ -19,10 +19,10 @@ class Stats(object):
                 ovData = OverwatchWorker.getUserInfo(row.battleId)
                 ovOldData = ast.literal_eval(row.overwatch_data)
                 
-                igen = ImageGen('overwatch', ovData, ovOldData)
-                igen.drawImgOverwatch()
-                await channel.send(file=discord.File('tmp/overwatch/overwatch.png'))
-                
+                # igen = ImageGen('overwatch', ovData, ovOldData)
+                # igen.drawImgOverwatch()
+                # await channel.send(file=discord.File('tmp/overwatch/overwatch.png'))
+
                 if (ovData['games']['played'] > ovOldData['games']['played']):
                     if (ovData['ranks']['damage']['rank'] != ovOldData['ranks']['damage']['rank'] or ovData['ranks']['support']['rank'] != ovOldData['ranks']['support']['rank'] or ovData['ranks']['tank']['rank'] != ovOldData['ranks']['tank']['rank']):        
                         OverwatchWorker.updateUser(
@@ -31,7 +31,7 @@ class Stats(object):
                             str(ovOldData)
                         )
                         igen = ImageGen('overwatch', ovData, ovOldData)
-                        await igen.drawImgOverwatch()
+                        igen.drawImgOverwatch()
                         await channel.send(file=discord.File('tmp/overwatch/overwatch.png'))
                         #'tmp/overwatch/overwatch.png'
                         #await channel.send(str(row.overwatch_data))
