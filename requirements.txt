@@ -6,3 +6,4 @@ python-decouple
 flask
 beautifulsoup4 
 requests
+numpy
