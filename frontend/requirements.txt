@@ -1,9 +1,9 @@
 discord.py
 peewee
-Pillow
+Pillow==2.6.1
 overwatch-api
 python-decouple
 flask
 beautifulsoup4 
 requests
-numpy
+numpy==1.14.3
