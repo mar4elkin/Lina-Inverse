@@ -2,7 +2,6 @@ version: '3.8'
 services: 
     backend:
         build: ./backend/
-        command: bash -c "pip install -r requirements.txt"
         volumes: 
             - ./backend/:/app/frontend/
         ports: 
