@@ -8,6 +8,7 @@ from discord.ext import commands
 from decouple import config
 from Models import *
 from os import walk
+from pathlib import Path
 from OverwatchWorker import OverwatchWorker
 from Exceptions import EmptyString
 from Exceptions import BattleTagAlready
@@ -21,12 +22,14 @@ def tmpFolder():
     """
     Функция создает "tmp" папку 
     """
-    try:
-        os.mkdir('tmp/overwatch')
-    except OSError:
-        print ("tmp папка не создана")
-    else:
-        print ("tmp папка создан")
+    if 'tmp' not in getFiles():
+        try:
+            os.mkdir('tmp')
+            Path("tmp/overwatch").mkdir(parents=True, exist_ok=True)
+        except OSError:
+            print ("tmp папка не создана")
+        else:
+            print ("tmp папка создан")
 
 def getFiles():
     """
@@ -121,6 +124,7 @@ async def on_ready():
     print('Logged in as ' + str(bot.user.name))
     await bot.change_presence(activity=discord.Game(name="`help"))
 
+tmpFolder()
 dbCreater()
 bot.loop.create_task(Stats.checkOverwatch(bot)) #, Stats.getAllUsers()))
 bot.add_cog(Overwatch(bot))
