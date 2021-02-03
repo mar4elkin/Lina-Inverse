@@ -13,6 +13,7 @@ from OverwatchWorker import OverwatchWorker
 from Exceptions import EmptyString
 from Exceptions import BattleTagAlready
 from Stats import Stats
+from Logger import blogger
 
 
 #api keys
@@ -27,9 +28,9 @@ def tmpFolder():
             os.mkdir('tmp')
             Path("tmp/overwatch").mkdir(parents=True, exist_ok=True)
         except OSError:
-            print ("tmp папка не создана")
+            blogger("tmp папка не создана")
         else:
-            print ("tmp папка создан")
+            blogger("tmp папка создан")
 
 def getFiles():
     """
@@ -50,8 +51,20 @@ def create_tables():
 
 def dbCreater():
     if 'database.db' not in getFiles():
-        print('База данных созданна')
+        blogger('База данных созданна')
         create_tables()
+
+class BotSys(commands.Cog):
+    def __init__(self, bot) -> None:
+        self.bot = bot
+    
+    @commands.command()
+    async def getLogs(self, ctx):
+        """
+        Логи бота
+        """
+        blogger(f'{ctx.author} asked for logs')
+        await ctx.send(file=discord.File('logs.log'))
     
 class Overwatch(commands.Cog):
     def __init__(self, bot) -> None:
@@ -109,6 +122,7 @@ class Overwatch(commands.Cog):
                     "check": True,
                 }
                 OverwatchWorker.addUser(data)
+                blogger(f'added new user {ctx.author}')
                 await ctx.send("Аккаунт добавлен")
             else:
                 await ctx.send("Данный аккаунт уже есть в базе")
@@ -122,10 +136,13 @@ async def on_ready():
     Метод срабатывет при загрузке бота
     """
     print('Logged in as ' + str(bot.user.name))
+    blogger('bot logged in')
     await bot.change_presence(activity=discord.Game(name="`help"))
 
 tmpFolder()
 dbCreater()
+blogger('loop started')
 bot.loop.create_task(Stats.checkOverwatch(bot)) #, Stats.getAllUsers()))
 bot.add_cog(Overwatch(bot))
+bot.add_cog(BotSys(bot))
 bot.run(DISOCRD_API_KEY)

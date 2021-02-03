@@ -2,6 +2,7 @@ from PIL import Image, ImageDraw, ImageFont
 from Exceptions import ImageGenAttr
 import requests
 import numpy as np
+from Logger import blogger
 
 class ImageGen(object):
     def __init__(self, imgtype, data, old_data):
@@ -12,7 +13,7 @@ class ImageGen(object):
             self.old_data = old_data
 
     def drawImgOverwatch(self):
-
+        blogger('drawing new img (overwatch)')
         def checkRank(x):
             if (x == 'None'):
                 return '0'
@@ -40,9 +41,11 @@ class ImageGen(object):
             data[mask] = white
             return Image.fromarray(data)
 
+        blogger('getting fonts')
         header_font = ImageFont.truetype('fonts/ov_font.ttf', 50)
         ranks_font = ImageFont.truetype('fonts/ov_font.ttf', 20)
 
+        blogger('getting rolls imgs')
         damage = Image.open('img/overwatch/damage.png').resize((30, 30))
         support = Image.open('img/overwatch/support.png').resize((30, 30))
         tank = Image.open('img/overwatch/tank.png').resize((30, 30))
@@ -50,6 +53,7 @@ class ImageGen(object):
         playeravatar_data = requests.get(self.data['player']['avatar']).content
         with open('tmp/overwatch/user_avatar.png', 'wb') as handler:
             handler.write(playeravatar_data)
+        blogger('downloaded player avatar')
         
         useravatar = Image.open('tmp/overwatch/user_avatar.png')
         useravatar = useravatar.resize((100, 100))
@@ -57,6 +61,7 @@ class ImageGen(object):
         hero_data = requests.get(self.data['player']['top_hero']).content
         with open('tmp/overwatch/tophero.png', 'wb') as handler:
             handler.write(hero_data)
+        blogger('downloaded player top hero')
         
         heroimg = Image.open('tmp/overwatch/tophero.png')
         
@@ -69,12 +74,15 @@ class ImageGen(object):
         img.paste(cutBackground(support), (25, 250), cutBackground(support))
         img.paste(cutBackground(tank), (25, 350), cutBackground(tank))
 
+        blogger('drawing icons and hero img')
+
         if self.data['ranks']['damage']['rank'] != 'None':
             dd = requests.get(self.data['ranks']['damage']['icon']).content
             with open('tmp/overwatch/dd_rank.png', 'wb') as handler:
                 handler.write(dd)
             ddimg = Image.open('tmp/overwatch/dd_rank.png').resize((30, 30))
             img.paste(cutBackground(ddimg), (170, 150), cutBackground(ddimg))
+            blogger('damage img and rank done!')
             
         if self.data['ranks']['support']['rank'] != 'None':
             sup = requests.get(self.data['ranks']['damage']['icon']).content
@@ -82,6 +90,7 @@ class ImageGen(object):
                 handler.write(sup)
             supimg = Image.open('tmp/overwatch/dd_rank.png').resize((30, 30))
             img.paste(cutBackground(supimg), (170, 250), cutBackground(supimg))
+            blogger('damage img and support done!')
 
         if self.data['ranks']['tank']['rank'] != 'None':
             tank = requests.get(self.data['ranks']['damage']['icon']).content
@@ -89,6 +98,7 @@ class ImageGen(object):
                 handler.write(tank)
             tankimg = Image.open('tmp/overwatch/dd_rank.png').resize((30, 30))
             img.paste(cutBackground(tankimg), (170, 350), cutBackground(tankimg))
+            blogger('damage img and tank done!')
         
         final_img = ImageDraw.Draw(img)
         final_img.text((130,35), self.data['player']['nickname'], (255, 255, 255), font=header_font)
@@ -110,6 +120,7 @@ class ImageGen(object):
         final_img.text((200,355), getDiff(checkRank(self.old_data['ranks']['tank']['rank']), checkRank(self.data['ranks']['tank']['rank'])), (255, 255, 255), font=ranks_font)
         
         img.save('tmp/overwatch/overwatch.png')
+        blogger('img saved!')
     
     def drawImgOsu(self):
         pass
