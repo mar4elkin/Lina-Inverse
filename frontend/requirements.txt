@@ -2,7 +2,6 @@ discord.py
 peewee
 Pillow==2.6.1
 python-decouple
-flask
 beautifulsoup4 
 requests
 numpy
