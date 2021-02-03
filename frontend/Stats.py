@@ -35,4 +35,4 @@ class Stats(object):
                         await channel.send(file=discord.File('tmp/overwatch/overwatch.png'))
                         #'tmp/overwatch/overwatch.png'
                         #await channel.send(str(row.overwatch_data))
-            await asyncio.sleep(20)
+            await asyncio.sleep(1200)
