@@ -3,7 +3,6 @@ import discord
 import json
 from OverwatchWorker import OverwatchWorker
 from ImageGen import ImageGen
-import logging
 import ast
 from Logger import blogger
 

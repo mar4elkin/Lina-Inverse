@@ -42,6 +42,13 @@ def getFiles():
         break
     return f
 
+def delLogFIle():
+    """
+    Функция удаляет логи
+    """
+    if 'logs.log' in getFiles():
+        os.remove("logs.log") 
+
 def create_tables():
     """
     Функция создает базу данных
@@ -139,6 +146,7 @@ async def on_ready():
     blogger('bot logged in')
     await bot.change_presence(activity=discord.Game(name="`help"))
 
+delLogFIle()
 tmpFolder()
 dbCreater()
 blogger('loop started')

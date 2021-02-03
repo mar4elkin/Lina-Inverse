@@ -50,4 +50,5 @@ class OverwatchWorker(object):
 
     @staticmethod
     def getUserInfo(battletag: str) -> str:
-        return requests.get(f"{config('BACKEND_URL', default=False)}{battletag.replace('#', '-')}").json()
+        url = config('BACKEND_URL', default=False)
+        return requests.get(f"{url}{battletag.replace('#', '-')}").json()
