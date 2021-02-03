@@ -79,7 +79,7 @@ class Overwatch(commands.Cog):
 
     # @commands.command()
     # async def test(self, ctx):
-    #     await ctx.send(discord.utils.get(ctx.guild.channels, name='land-of-bots').id)
+    #     await ctx.send(f'<@!{ctx.author.id}>')
 
     @commands.command()
     async def add_profile(self, ctx, battle_net=None): #, channel_name=None):
