@@ -82,23 +82,23 @@ class ImageGen(object):
                 handler.write(dd)
             ddimg = Image.open('tmp/overwatch/dd_rank.png').resize((30, 30))
             img.paste(cutBackground(ddimg), (170, 150), cutBackground(ddimg))
-            blogger('damage img and rank done!')
+            blogger('damage img done!')
             
         if self.data['ranks']['support']['rank'] != 'None':
-            sup = requests.get(self.data['ranks']['damage']['icon']).content
+            sup = requests.get(self.data['ranks']['support']['icon']).content
             with open('tmp/overwatch/sup_rank.png', 'wb') as handler:
                 handler.write(sup)
             supimg = Image.open('tmp/overwatch/dd_rank.png').resize((30, 30))
             img.paste(cutBackground(supimg), (170, 250), cutBackground(supimg))
-            blogger('damage img and support done!')
+            blogger('support img done!')
 
         if self.data['ranks']['tank']['rank'] != 'None':
-            tank = requests.get(self.data['ranks']['damage']['icon']).content
+            tank = requests.get(self.data['ranks']['tank']['icon']).content
             with open('tmp/overwatch/tank_rank.png', 'wb') as handler:
                 handler.write(tank)
             tankimg = Image.open('tmp/overwatch/dd_rank.png').resize((30, 30))
             img.paste(cutBackground(tankimg), (170, 350), cutBackground(tankimg))
-            blogger('damage img and tank done!')
+            blogger('tank img done!')
         
         final_img = ImageDraw.Draw(img)
         final_img.text((130,35), self.data['player']['nickname'], (255, 255, 255), font=header_font)
